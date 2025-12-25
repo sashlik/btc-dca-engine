@@ -1,5 +1,7 @@
 package com.hillariousstartups.btcdca
 
+import com.google.cloud.firestore.Firestore
+import com.google.cloud.firestore.FirestoreOptions
 import java.math.BigDecimal
 import java.nio.file.Paths
 import java.time.Instant
@@ -9,8 +11,30 @@ import java.time.Instant
  * No Telegram integration yet.
  */
 fun main() {
+
     val env = System.getenv("TEST") ?: "not set"
     println("It runs ok. TEST=$env")
+
+    // Инициализация Firestore
+    val firestore: Firestore = FirestoreOptions.getDefaultInstance().service
+
+    // Получаем первую запись из коллекции
+    val querySnapshot = firestore
+        .collection("test-collection")
+        .limit(1)
+        .get()
+        .get()   // blocking, для batch job это нормально
+
+    if (querySnapshot.isEmpty) {
+        println("Collection is empty")
+        return
+    }
+
+    val doc = querySnapshot.documents.first()
+    val firstName = doc.getString("firstName")
+
+    println("firstName = $firstName")
+
     if (true) {
         return
     }
