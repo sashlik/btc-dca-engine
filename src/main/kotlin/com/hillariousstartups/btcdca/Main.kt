@@ -1,93 +1,39 @@
-package com.hillariousstartups.btcdca
-
-import com.fasterxml.jackson.databind.ObjectMapper
-import com.google.cloud.firestore.Firestore
 import com.google.cloud.firestore.FirestoreOptions
-import java.math.BigDecimal
-import java.net.URI
-import java.net.http.HttpClient
-import java.net.http.HttpRequest
-import java.net.http.HttpResponse
-import java.nio.file.Paths
-import java.time.Duration
+import com.hillariousstartups.btcdca.CoinGeckoPriceSource
+import com.hillariousstartups.btcdca.FirestorePriceHistoryRepository
+import com.hillariousstartups.btcdca.FirestoreStrategyStateRepository
+import com.hillariousstartups.btcdca.PriceHistoryRepository
+import com.hillariousstartups.btcdca.PriceSource
+import com.hillariousstartups.btcdca.StrategyConfig
+import com.hillariousstartups.btcdca.StrategyOrchestrator
+import com.hillariousstartups.btcdca.StrategyStateRepository
 import java.time.Instant
 
-private val http = HttpClient.newBuilder()
-    .connectTimeout(Duration.ofSeconds(5))
-    .build()
-
-private val json = ObjectMapper()
-
-/**
- * Minimal entrypoint just to show how the engine can be wired with a state file.
- * No Telegram integration yet.
- */
 fun main() {
+    val firestore = FirestoreOptions.getDefaultInstance().service
 
-    val env = System.getenv("TEST") ?: "not set"
-    println("It runs ok. TEST=$env")
+    val config = StrategyConfig()
+    val priceSource: PriceSource = CoinGeckoPriceSource()
 
-    // Инициализация Firestore
-    val firestore: Firestore = FirestoreOptions.getDefaultInstance().service
-
-    // Получаем первую запись из коллекции
-    val querySnapshot = firestore
-        .collection("test-collection")
-        .limit(1)
-        .get()
-        .get()   // blocking, для batch job это нормально
-
-    if (querySnapshot.isEmpty) {
-        println("Collection is empty")
-        return
-    }
-
-    val doc = querySnapshot.documents.first()
-    val firstName = doc.getString("firstName")
-
-    println("firstName = $firstName")
-
-
-
-    fun btcUsdFromCoinGecko(): BigDecimal {
-        val request = HttpRequest.newBuilder()
-            .uri(URI.create(
-                "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd"
-            ))
-            .timeout(Duration.ofSeconds(5))
-            .GET()
-            .build()
-
-        val response = http.send(request, HttpResponse.BodyHandlers.ofString())
-        require(response.statusCode() == 200) { "HTTP ${response.statusCode()}" }
-
-        val root = json.readTree(response.body())
-        return root["bitcoin"]["usd"].decimalValue()
-    }
-    println("BTC/USD = ${btcUsdFromCoinGecko()}")
-
-    if (true) {
-        return
-    }
-    val config = StrategyConfig(
-        // You can tweak config here for local experiments.
-        monthStartDay = 2,
+    val historyRepo: PriceHistoryRepository = FirestorePriceHistoryRepository(
+        firestore = firestore,
+        strategyId = "btc-dca",
+        idempotentBySlot = true
     )
 
-    val repo = FileStateRepository(Paths.get("data/state.json"))
-    val state = repo.load()
+    val stateRepo: StrategyStateRepository = FirestoreStrategyStateRepository(firestore)
 
-    // Placeholder: replace with real market price feed later.
-    val now = Instant.now()
-    val history = listOf(
-        PricePoint(now.minusSeconds(3600 * 24), BigDecimal("95000")),
-        PricePoint(now, BigDecimal("93000")),
+    val orchestrator = StrategyOrchestrator(
+        strategyId = "btc-dca",
+        config = config,
+        priceSource = priceSource,
+        historyRepo = historyRepo,
+        stateRepo = stateRepo
     )
 
-    val engine = StrategyEngine(config)
-    val result = engine.evaluate(now, history, state)
+    val result = orchestrator.runOnce(Instant.now())
 
-    result.signals.forEach { println("SIGNAL: buy ${it.amountUsd} USD | ${it.reason}") }
-
-    repo.save(result.state)
+    println("Signals: ${result.signals.size}")
+    result.signals.forEach { println(it) }
+    println("New state: ${result.state}")
 }
