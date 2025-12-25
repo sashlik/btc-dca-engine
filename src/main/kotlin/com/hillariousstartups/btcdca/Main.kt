@@ -9,6 +9,10 @@ import java.time.Instant
  * No Telegram integration yet.
  */
 fun main() {
+    println("It runs ok")
+    if (true) {
+        return
+    }
     val config = StrategyConfig(
         // You can tweak config here for local experiments.
         monthStartDay = 2,
