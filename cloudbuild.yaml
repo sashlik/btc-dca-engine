@@ -1,0 +1,26 @@
+substitutions:
+  _REGION: europe-west1
+  _JOB: btc-dca-job
+
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - europe-west1-docker.pkg.dev/$PROJECT_ID/btc-dca/btc-dca-engine:$COMMIT_SHA
+      - .
+
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - europe-west1-docker.pkg.dev/$PROJECT_ID/btc-dca/btc-dca-engine:$COMMIT_SHA
+
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk
+    entrypoint: gcloud
+    args:
+      - run
+      - jobs
+      - update
+      - ${_JOB}
+      - --region=${_REGION}
+      - --image=europe-west1-docker.pkg.dev/$PROJECT_ID/btc-dca/btc-dca-engine:$COMMIT_SHA
