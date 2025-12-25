@@ -9,7 +9,7 @@ import java.time.Instant
  * No Telegram integration yet.
  */
 fun main() {
-    println("It runs ok")
+    println("It runs ok.")
     if (true) {
         return
     }
