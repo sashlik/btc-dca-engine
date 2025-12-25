@@ -9,7 +9,8 @@ import java.time.Instant
  * No Telegram integration yet.
  */
 fun main() {
-    println("It runs ok.")
+    val env = System.getenv("TEST") ?: "not set"
+    println("It runs ok. TEST=$env")
     if (true) {
         return
     }
