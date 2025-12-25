@@ -1,0 +1,50 @@
+############################
+# Maven
+############################
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+############################
+# Kotlin
+############################
+*.class
+*.log
+
+############################
+# IntelliJ IDEA
+############################
+.idea/
+*.iml
+*.iws
+*.ipr
+out/
+
+############################
+# OS files
+############################
+.DS_Store
+Thumbs.db
+
+############################
+# Local state & data
+# (strategy runtime files)
+############################
+data/
+state.json
+state*.json
+prices*.json
+prices*.jsonl
+
+############################
+# Env / secrets
+############################
+.env
+.env.*
+*.local
+
+############################
+# Temporary / debug
+############################
+*.tmp
+*.bak
+*.swp
