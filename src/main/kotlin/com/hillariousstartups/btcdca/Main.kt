@@ -1,15 +1,6 @@
+package com.hillariousstartups.btcdca
+
 import com.google.cloud.firestore.FirestoreOptions
-import com.hillariousstartups.btcdca.CoinGeckoPriceSource
-import com.hillariousstartups.btcdca.FirestorePriceHistoryRepository
-import com.hillariousstartups.btcdca.FirestoreStrategyStateRepository
-import com.hillariousstartups.btcdca.PriceHistoryRepository
-import com.hillariousstartups.btcdca.PriceSource
-import com.hillariousstartups.btcdca.StrategyConfig
-import com.hillariousstartups.btcdca.StrategyOrchestrator
-import com.hillariousstartups.btcdca.StrategyStateRepository
-import com.hillariousstartups.btcdca.TgBot
-import com.hillariousstartups.btcdca.Tier
-import com.hillariousstartups.btcdca.getEnv
 import java.math.BigDecimal
 import java.time.Instant
 
