@@ -12,6 +12,7 @@ data class BuySignal(
     val time: Instant,
     val amountUsd: BigDecimal,
     val reason: String,
+    val text: String
 )
 
 data class Tier(

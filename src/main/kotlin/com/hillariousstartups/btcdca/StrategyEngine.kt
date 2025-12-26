@@ -6,6 +6,9 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
 
+private const val DISCLAIMER =
+    "Риск-ориентир: 15% капитала в BTC — пауза в докупках, 20% — фиксация излишков."
+
 class StrategyEngine(
     private val config: StrategyConfig,
 ) {
@@ -39,7 +42,9 @@ class StrategyEngine(
                 signals += BuySignal(
                     time = now,
                     amountUsd = base,
-                    reason = "Base DCA for period $periodKey (start day=${config.monthStartDay})"
+                    reason = "Base DCA for period $periodKey (start day=${config.monthStartDay})",
+                    text = "Сигнал: докупи на сумму $base USD в рамках ежемесячной покупки. " +
+                            DISCLAIMER
                 )
                 spent = spent.add(base)
             }
@@ -53,7 +58,19 @@ class StrategyEngine(
             signals += BuySignal(
                 time = now,
                 amountUsd = additional,
-                reason = "Drawdown ${(drawdown * BigDecimal(100)).setScale(1, RoundingMode.HALF_UP)}% -> target $tierTarget USD for period $periodKey"
+                reason = "Drawdown ${
+                    (drawdown * BigDecimal(100)).setScale(
+                        1,
+                        RoundingMode.HALF_UP
+                    )
+                }% -> target $tierTarget USD for period $periodKey",
+                text = "Сигнал: докупи на сумму $additional USD. Просадка ${
+                    (drawdown * BigDecimal(100)).setScale(
+                        1,
+                        RoundingMode.HALF_UP
+                    )
+                }%. Таргент на период $tierTarget USD. " +
+                        DISCLAIMER
             )
             spent = tierTarget
         }

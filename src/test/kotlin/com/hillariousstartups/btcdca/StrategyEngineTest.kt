@@ -1,6 +1,7 @@
 package com.hillariousstartups.btcdca
 
-import org.junit.jupiter.api.Assertions.*
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.Instant
@@ -19,7 +20,7 @@ class StrategyEngineTest {
             Tier(BigDecimal("0.15"), BigDecimal("0.25"), BigDecimal("400")),
             Tier(BigDecimal("0.25"), BigDecimal("0.35"), BigDecimal("600")),
             Tier(BigDecimal("0.35"), BigDecimal("0.45"), BigDecimal("800")),
-            Tier(BigDecimal("0.45"), null,            BigDecimal("1000")),
+            Tier(BigDecimal("0.45"), null, BigDecimal("1000")),
         )
     )
 

@@ -21,10 +21,30 @@ data class StrategyConfig(
 
     /** Tiers must be sorted by drawdownFromInclusive ascending. */
     val tiers: List<Tier> = listOf(
-        Tier(drawdownFromInclusive = BigDecimal("0.00"), drawdownToExclusive = BigDecimal("0.15"), targetMonthlySpendUsd = BigDecimal("250")),
-        Tier(drawdownFromInclusive = BigDecimal("0.15"), drawdownToExclusive = BigDecimal("0.25"), targetMonthlySpendUsd = BigDecimal("400")),
-        Tier(drawdownFromInclusive = BigDecimal("0.25"), drawdownToExclusive = BigDecimal("0.35"), targetMonthlySpendUsd = BigDecimal("600")),
-        Tier(drawdownFromInclusive = BigDecimal("0.35"), drawdownToExclusive = BigDecimal("0.45"), targetMonthlySpendUsd = BigDecimal("800")),
-        Tier(drawdownFromInclusive = BigDecimal("0.45"), drawdownToExclusive = null,            targetMonthlySpendUsd = BigDecimal("1000")),
+        Tier(
+            drawdownFromInclusive = BigDecimal("0.00"),
+            drawdownToExclusive = BigDecimal("0.15"),
+            targetMonthlySpendUsd = BigDecimal("250")
+        ),
+        Tier(
+            drawdownFromInclusive = BigDecimal("0.15"),
+            drawdownToExclusive = BigDecimal("0.25"),
+            targetMonthlySpendUsd = BigDecimal("400")
+        ),
+        Tier(
+            drawdownFromInclusive = BigDecimal("0.25"),
+            drawdownToExclusive = BigDecimal("0.35"),
+            targetMonthlySpendUsd = BigDecimal("600")
+        ),
+        Tier(
+            drawdownFromInclusive = BigDecimal("0.35"),
+            drawdownToExclusive = BigDecimal("0.45"),
+            targetMonthlySpendUsd = BigDecimal("800")
+        ),
+        Tier(
+            drawdownFromInclusive = BigDecimal("0.45"),
+            drawdownToExclusive = null,
+            targetMonthlySpendUsd = BigDecimal("1000")
+        ),
     ),
 )

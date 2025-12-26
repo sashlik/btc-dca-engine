@@ -3,7 +3,6 @@ package com.hillariousstartups.btcdca
 import com.google.cloud.Timestamp
 import com.google.cloud.firestore.Firestore
 import com.google.cloud.firestore.Query
-import java.math.BigDecimal
 import java.time.Instant
 import java.time.ZoneOffset
 import java.time.ZonedDateTime

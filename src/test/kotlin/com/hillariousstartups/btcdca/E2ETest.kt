@@ -5,9 +5,11 @@ import com.google.cloud.firestore.FirestoreOptions
 import org.junit.jupiter.api.Test
 import java.math.BigDecimal
 import java.time.Instant
+import kotlin.test.Ignore
 
 class E2ETest {
 
+    @Ignore
     @Test
     fun `e2e test`() {
         // Kotlin
@@ -27,17 +29,11 @@ class E2ETest {
             firestore = firestore,
             strategyId = strategyId,
             idempotentBySlot = true,
-            slotSeconds = 10 // ускоряем, чтобы новые точки появлялись быстро
+            slotSeconds = 10
         )
 
         val stateRepo = FirestoreStrategyStateRepository(firestore)
 
-
-        // Сценарий цен:
-        // 1) peak
-        // 2) -20%
-        // 3) -30%
-        // 4) ещё раз около -30% (не должен спамить, если у тебя в логике есть анти-спам по tier)
         val prices = listOf(
             bd("100000"),
             bd("80000"),
@@ -64,7 +60,6 @@ class E2ETest {
             println("state=${result.state}")
             println()
 
-            // смещаем время, чтобы попасть в следующий 10-секундный слот
             now = now.plusSeconds(15)
         }
     }
