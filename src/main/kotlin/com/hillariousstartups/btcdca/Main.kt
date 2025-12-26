@@ -60,13 +60,14 @@ fun main() {
 
     val result = orchestrator.runOnce(Instant.now())
 
-    println("Signals: ${result.signals.size}")
-    result.signals.forEach { println(it) }
+
 
     val tgBot = TgBot(
         botToken = getEnv("TG_BOT_TOKEN", ""),
         chatId = getEnv("TG_CHAT_ID", 0L)
     )
-    tgBot.send("test")
+
+    println("Signals: ${result.signals.size}")
+    result.signals.forEach { println(it);  tgBot.send(it.text); }
 }
 
