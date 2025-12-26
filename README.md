@@ -1,49 +1,80 @@
-# BTC DCA Engine (Kotlin + Maven)
+# BTC DCA Engine (Kotlin)
 
-A small, test-driven core of the strategy we discussed:
+A production-ready **DCA + drawdown-tiers engine** written in Kotlin and designed to run as a **Cloud Run Job**.
 
-- **Base DCA**: $250 per period (a “month” starting on a configurable day-of-month, e.g. every 2nd).
-- **Monthly cap**: $1,000 maximum recommended buys per period.
-- **Drawdown tiers**: when drawdown deepens, the engine recommends buying the *difference* up to the tier's **target monthly spend**.
-- **Rolling peak**: max price over the last **90 days**.
-- **Hysteresis**: reference peak only updates if rolling peak exceeds it by **+1%** (prevents noisy “micro reset” near highs).
-- **No Telegram yet**: this module only outputs `BuySignal`s + updates persistent state.
-- **State storage**: JSON file (later we can replace with DB).
+The engine periodically:
+1. Fetches the current BTC price
+2. Persists it as a time-bucketed price point
+3. Evaluates a DCA strategy with drawdown tiers
+4. Updates persistent strategy state
+5. Sends Telegram notifications when buy signals are generated
 
-## Project layout
+> ⚠️ This project **does not place orders**. It only produces buy recommendations.
 
-- `StrategyConfig` – all parameters (you can keep it in Kotlin for now).
-- `StrategyEngine` – pure logic: `evaluate(now, priceHistory, state) -> signals + newState`.
-- `FileStateRepository` – JSON state in `data/state.json` (demo usage in `Main.kt`).
-- Tests in `StrategyEngineTest` show reproducible signals.
+---
 
-## How the engine decides buy signals
+## Core strategy rules
 
-1. Determine the **period key** (month-like period) using `monthStartDay`.
-2. If this is a **new period**, emit base DCA ($250) and count it into spent amount.
-3. Compute **rolling peak** over the last `lookbackDays` (default 90).
-4. Update **reference peak** with hysteresis (+1%).
-5. Compute drawdown from reference peak and choose tier's `targetMonthlySpendUsd`.
-6. If `targetMonthlySpendUsd > alreadySpentThisPeriod`, emit an additional buy signal for the difference (bounded by `monthlyCapUsd`).
+- **Custom monthly period**
+    - Month starts at configurable `monthStartDay` (e.g. day 2)
+- **Base DCA**
+    - Once per period (default: `$250`)
+- **Monthly cap**
+    - Hard upper limit per period (default: `$1000`)
+- **Drawdown tiers**
+    - When drawdown deepens into a higher tier, the engine buys **up to the tier target**, not a fixed amount
+- **Rolling peak**
+    - Peak price is calculated over a rolling lookback window (e.g. 90 days)
+- **Anti-spam logic**
+    - Re-entering the same tier does not trigger repeated buys
 
-## Run tests
+---
 
+## Architecture overview
+
+PriceSource (CoinGecko)
+↓
+PriceHistoryRepository (Firestore)
+↓
+StrategyEngine (pure logic)
+↓
+StrategyStateRepository (Firestore)
+↓
+TelegramNotifier
+
+### Key design principles
+- **Pure strategy logic** (easy to test, reason about, and evolve)
+- **Idempotent execution** (safe retries / multiple runs)
+- **Explicit state transitions**
+- **Fail-fast behavior**
+
+## Running locally (Firestore emulator)
+
+### Start Firestore emulator
 ```bash
-mvn test
+docker compose down
+docker compose up
 ```
+(No volume attached → clean database on each restart.)
 
-## Run locally (demo)
+Cloud Run Job
 
-```bash
-mvn -q -DskipTests package
-java -cp target/btc-dca-engine-0.1.0-SNAPSHOT.jar com.example.btcdca.MainKt
-```
+The project is designed to run as a Cloud Run Job:
+•	one execution = one evaluation
+•	safe to run via cron or manually
+•	Firestore used for persistence
+•	environment variables for configuration
 
-> Note: `Main.kt` uses placeholder prices. Replace them later with a real price feed.
+Required environment variables
+TELEGRAM_BOT_TOKEN
+TELEGRAM_CHAT_ID
+GOOGLE_CLOUD_PROJECT
 
-## Next steps (planned)
+What this project intentionally does NOT do
+•	No order execution
+•	No exchange integration
+•	No portfolio tracking
+•	No predictions
 
-- Replace placeholder price feed with Kraken/CoinGecko client
-- Telegram integration (`sendMessage`)
-- Move state from file to Firestore/DynamoDB
-- Add “every 4 hours” scheduler adapter (Cloud Run Job / Lambda / cron)
+This is a decision engine, not a trading bot.
+
