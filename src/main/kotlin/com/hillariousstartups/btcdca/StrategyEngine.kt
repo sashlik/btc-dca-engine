@@ -7,7 +7,7 @@ import java.time.LocalDate
 import java.time.ZoneOffset
 
 private const val DISCLAIMER =
-    "Риск-ориентир: 15% капитала в BTC — пауза в докупках, 20% — фиксация излишков."
+    "Риск-ориентир: 15% капитала в BTC — пауза в докупках, 25% — фиксация излишков до 20% и перевод в ETF."
 
 class StrategyEngine(
     private val config: StrategyConfig,
